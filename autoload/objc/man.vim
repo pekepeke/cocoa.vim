@@ -18,8 +18,11 @@ let locations = [
 			\	{'path': '/Developer/Documentation/DocSets/com.apple.adc.documentation.AppleSnowLeopard.CoreReference.docset',
 			\	'alias': 'Snow Leopard'},
 			\	{'path': '/Developer/Platforms/iPhoneOS.platform/Developer/Documentation/DocSets/com.apple.adc.documentation.AppleiPhone3_0.iPhoneLibrary.docset',
-			\	'alias': 'iPhone 3.0'}
+			\	'alias': 'iPhone 3.0'},
+			\	{'path': '/Library/Developer/Shared/Documentation/DocSets/com.apple.adc.documentation.AppleiOS5_0.iOSLibrary.docset',
+			\	'alias': 'iPhone 5.0'}
 			\	]
+
 for location in locations
 	if isdirectory(location.path)
 		call add(s:docsets, location)
