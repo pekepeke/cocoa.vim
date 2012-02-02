@@ -5,7 +5,7 @@ Quickly install with:
     git clone git://github.com/msanders/cocoa.vim.git
 	cp -r . ~/.vim
 
-Remove annoying "is a web application downloaded from the internet" prompt with:
+Remove annoying "is a web application downloaded from the internet" prompt when viewing docs with:
 
-  cd /Library/Developer/Shared/Documentation/DocSets
-  sudo xattr -rd com.apple.quarantine *.docset
+	cd /Library/Developer/Shared/Documentation/DocSets
+  	sudo xattr -rd com.apple.quarantine *.docset
