@@ -47,6 +47,16 @@ if empty(b:cocoa_proj)
 	endif
 endif
 
+nn <buffer> <d-r> :w<bar>call <SID>ExecInXcode('Run')<cr>
+nn <buffer> <d-b> :w<bar>call <SID>ExecInXcode('Build')<cr>
+nn <buffer> <d-u> :w<bar>call <SID>ExecInXcode('Test')<cr>
+nn <buffer> <d-i> :w<bar>call <SID>ExecInXcode('Profile')<cr>
+nn <buffer> <d-B> :w<bar>call <SID>ExecInXcode('Analyze')<cr>
+nn <buffer> <d-K> :w<bar>call <SID>ExecInXcode('Clean')<cr>
+
+" execute only once after this line
+if exists('*s:ExecInXcode') | finish | endif
+
 function s:ExecInXcode(command)
 	" Build   Cmd-B
 	" Run     Cmd-R
@@ -74,10 +84,3 @@ function s:ExecInXcode(command)
 				\ ."    end tell \r"
 				\ ."end tell'")
 endfunction
-
-nn <buffer> <d-r> :w<bar>call <SID>ExecInXcode('Run')<cr>
-nn <buffer> <d-b> :w<bar>call <SID>ExecInXcode('Build')<cr>
-nn <buffer> <d-u> :w<bar>call <SID>ExecInXcode('Test')<cr>
-nn <buffer> <d-i> :w<bar>call <SID>ExecInXcode('Profile')<cr>
-nn <buffer> <d-B> :w<bar>call <SID>ExecInXcode('Analyze')<cr>
-nn <buffer> <d-K> :w<bar>call <SID>ExecInXcode('Clean')<cr>
