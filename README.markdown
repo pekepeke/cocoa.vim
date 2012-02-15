@@ -12,6 +12,6 @@ Remove annoying "is a web application downloaded from the internet" prompt when 
 
 To allow custom Cmd-b key binding (to issue 'Build' in the Xcode), put the following in the .gvimrc:
 
-if has("gui_macvim")
-	macmenu &Tools.Make key=<nop>
-endif
+	if has("gui_macvim")
+		macmenu &Tools.Make key=<nop>
+	endif
