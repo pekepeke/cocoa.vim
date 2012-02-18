@@ -47,15 +47,39 @@ if empty(b:cocoa_proj)
 	endif
 endif
 
-nn <buffer> <d-r> :w<bar>call <SID>ExecInXcode('Run')<cr>
-nn <buffer> <d-b> :w<bar>call <SID>ExecInXcode('Build')<cr>
-nn <buffer> <d-u> :w<bar>call <SID>ExecInXcode('Test')<cr>
-nn <buffer> <d-i> :w<bar>call <SID>ExecInXcode('Profile')<cr>
-nn <buffer> <d-B> :w<bar>call <SID>ExecInXcode('Analyze')<cr>
-nn <buffer> <d-K> :w<bar>call <SID>ExecInXcode('Clean')<cr>
+nn <buffer> <d-r> :w<bar>call g:RunInXcode()<cr>
+nn <buffer> <d-b> :w<bar>call g:BuildInXcode()<cr>
+nn <buffer> <d-u> :w<bar>call g:TestInXcode()<cr>
+nn <buffer> <d-i> :w<bar>call g:ProfileInXcode()<cr>
+nn <buffer> <d-B> :w<bar>call g:AnalyzeInXcode()<cr>
+nn <buffer> <d-K> :w<bar>call g:CleanInXcode()<cr>
 
 " execute only once after this line
 if exists('*s:ExecInXcode') | finish | endif
+
+function g:RunInXcode()
+	call s:ExecInXcode('Run')
+endfunction
+
+function g:BuildInXcode()
+	call s:ExecInXcode('Build')
+endfunction
+
+function g:TestInXcode()
+	call s:ExecInXcode('Test')
+endfunction
+
+function g:ProfileInXcode()
+	call s:ExecInXcode('Profile')
+endfunction
+
+function g:AnalyzeInXcode()
+	call s:ExecInXcode('Analyze')
+endfunction
+
+function g:CleanInXcode()
+	call s:ExecInXcode('Clean')
+endfunction
 
 function s:ExecInXcode(command)
 	" Build   Cmd-B
