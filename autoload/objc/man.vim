@@ -20,7 +20,7 @@ let locations = [
 			\	{'path': '/Developer/Platforms/iPhoneOS.platform/Developer/Documentation/DocSets/com.apple.adc.documentation.AppleiPhone3_0.iPhoneLibrary.docset',
 			\	'alias': 'iPhone 3.0'},
 			\	{'path': '/Library/Developer/Shared/Documentation/DocSets/com.apple.adc.documentation.AppleiOS5_0.iOSLibrary.docset',
-			\	'alias': 'iPhone 5.0'}
+			\	'alias': 'iPhone 5.0 Xcode 4.2'}
 			\	]
 
 for location in locations
@@ -28,8 +28,10 @@ for location in locations
 		call add(s:docsets, location)
 	endif
 endfor
-
 let s:docset_cmd = '/Developer/usr/bin/docsetutil search -skip-text -query '
+if !executable(s:docset_cmd)
+	let s:docset_cmd = '/Applications/Xcode.app/Contents/Developer/usr/bin/docsetutil search -skip-text -query '
+endif
 
 fun s:OpenFile(file)
 	if a:file =~ '/.*/man/'
