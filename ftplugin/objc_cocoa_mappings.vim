@@ -10,17 +10,32 @@ nn <buffer> <silent> K :<c-u>call objc#man#ShowDoc()<cr>
 setlocal makeprg=xcodebuild\ -sdk\ iphonesimulator5.0
 
 " Xcode bindings
-let b:cocoa_proj = fnameescape(globpath(expand('<afile>:p:h'), '*.xcodeproj'))
+let b:cocoa_proj = fnameescape(globpath(expand('<afile>:p:h'), '*.xcworkspace'))
 " Search a few levels up to see if we can find the project file
 if empty(b:cocoa_proj)
-	let b:cocoa_proj  = fnameescape(globpath(expand('<afile>:p:h:h'), '*.xcodeproj'))
+	let b:cocoa_proj  = fnameescape(globpath(expand('<afile>:p:h:h'), '*.xcworkspace'))
 
 	if empty(b:cocoa_proj)
-		let b:cocoa_proj = fnameescape(globpath(expand('<afile>:p:h:h:h'), '*.xcodeproj'))
+		let b:cocoa_proj = fnameescape(globpath(expand('<afile>:p:h:h:h'), '*.xcworkspace'))
 		if empty(b:cocoa_proj)
-			let b:cocoa_proj = fnameescape(globpath(expand('<afile>:p:h:h:h:h'), '*.xcodeproj'))
+			let b:cocoa_proj = fnameescape(globpath(expand('<afile>:p:h:h:h:h'), '*.xcworkspace'))
 		endif
 	endif
+endif
+
+if empty(b:cocoa_proj)
+    let b:cocoa_proj = fnameescape(globpath(expand('<afile>:p:h'), '*.xcodeproj'))
+    " Search a few levels up to see if we can find the project file
+    if empty(b:cocoa_proj)
+        let b:cocoa_proj  = fnameescape(globpath(expand('<afile>:p:h:h'), '*.xcodeproj'))
+
+        if empty(b:cocoa_proj)
+            let b:cocoa_proj = fnameescape(globpath(expand('<afile>:p:h:h:h'), '*.xcodeproj'))
+            if empty(b:cocoa_proj)
+                let b:cocoa_proj = fnameescape(globpath(expand('<afile>:p:h:h:h:h'), '*.xcodeproj'))
+            endif
+        endif
+    endif
 endif
 
 nn <buffer> <silent> <d-0> :call system('open -a Xcode '.b:cocoa_proj)<cr>
