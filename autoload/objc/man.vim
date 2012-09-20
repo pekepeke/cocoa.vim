@@ -52,7 +52,7 @@ fun s:OpenFile(file)
 	endif
 endf
 
-fun objc#man#ShowDoc(...)
+fun objc#man#ShowDocNonDash(...)
 	let word = a:0 ? a:1 : matchstr(getline('.'), '\<\w*\%'.col('.').'c\w\+:\=')
 
 	" Look up the whole method if it takes multiple arguments.
@@ -117,6 +117,26 @@ fun objc#man#ShowDoc(...)
 		echo "Can't find documentation for ".word
 		echoh None
 	endif
+endf
+
+fun objc#man#ShowDoc(...)
+	let word = a:0 ? a:1 : matchstr(getline('.'), '\<\w*\%'.col('.').'c\w\+:\=')
+
+	" Look up the whole method if it takes multiple arguments.
+	if !a:0 && word[len(word) - 1] == ':'
+		let word = s:GetMethodName()
+	endif
+
+	if word == ''
+		if !a:0 " Mimic K if using it as such
+			echoh ErrorMsg
+			echo 'E349: No identifier under cursor'
+			echoh None
+		endif
+		return
+	endif
+
+	call system('osascript -e ''open location "dash://'.word.'"'' &')
 endf
 
 fun s:ChooseFrom(references)
