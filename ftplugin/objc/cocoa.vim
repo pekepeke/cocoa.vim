@@ -3,11 +3,38 @@
 " Description: Sets up mappings for cocoa.vim.
 " Last Updated: December 26, 2009
 
-" use custom man
-nn <buffer> <silent> K :<c-u>call objc#man#ShowDoc()<cr>
+" settings {{{
+if !exists('b:undo_ftplugin')
+    let b:undo_ftplugin = ''
+endif
+
+setlocal expandtab shiftwidth=4 softtabstop=4 tabstop=8
+
 
 " use xcodebuild as make program
-setlocal makeprg=xcodebuild\ -sdk\ iphonesimulator5.0
+if globpath(expand('<afile>:p:h'), '*.xcodeproj') != ''
+    setlocal makeprg=open\ -a\ xcode\ &&\ osascript\ -e\ 'tell\ app\ \"Xcode\"\ to\ build'
+else
+    setlocal makeprg=xcodebuild\ -sdk\ iphonesimulator5.0
+endif
+setl include=^\s*#\s*import
+
+let b:match_words = '@\(implementation\|interface\):@end'
+
+setlocal omnifunc=objc#cocoacomplete#Complete
+
+if &ft != 'objc'
+    let b:undo_ftplugin .= '
+        \ | setlocal expandtab< shiftwidth< softtabstop< tabstop<
+        \ makeprg< include< omnifunc<
+        \'
+endif
+"}}}
+
+
+" mappings {{{
+" use custom man
+nn <buffer> <silent> K :<c-u>call objc#man#ShowDoc()<cr>
 
 " Xcode bindings
 let b:cocoa_proj = fnameescape(globpath(expand('<afile>:p:h'), '*.xcworkspace'))
@@ -124,3 +151,4 @@ fun s:ReadableExtensionIn(path, extensions)
 	endfor
 	return 0
 endf
+" }}}
