@@ -5,6 +5,13 @@
 " NOTE:         See http://tinyurl.com/remove-annoying-alert
 "               for removing the annoying security alert in Leopard.
 
+
+let g:objc#man#dash_keyword = exists('g:objc#man#dash_keyword')
+\ ? g:objc#man#dash_keyword : 'macosx:'
+
+
+
+
 " Return all matches in for ":CocoaDoc <tab>" sorted by length.
 fun objc#man#Completion(ArgLead, CmdLine, CursorPos)
 	return system('grep -ho "^'.a:ArgLead.'\w*" ~/.vim/lib/cocoa_indexes/*.txt'.
@@ -136,7 +143,7 @@ fun objc#man#ShowDoc(...)
 		return
 	endif
 
-	call system('osascript -e ''open location "dash://'.word.'"'' &')
+	call system('open "dash://'. g:objc#man#dash_keyword . word . '"')
 endf
 
 fun s:ChooseFrom(references)

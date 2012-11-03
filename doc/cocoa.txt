@@ -65,6 +65,17 @@ FEATURE OVERVIEW                                              *cocoa-features*
 	   methods and functions are automatically converted to snippets to
 	   <tab> over if you have snipMate installed.
 
+------------------------------------------------------------------------------
+SETTINGS 					*cocoa-variables*
+
+g:objc#man#dash_keyword				*g:objc#man#dash_keyword*
+		This variable add keyword prefix to the dash url search scheme.
+
+		- dash://|g:objc#man#dash_keyword|<cword>
+
+		By default, |g:objc#man#dash_keyword| is "macosx:".
+
+		Refer to: http://kapeli.com/dash/
 ==============================================================================
 MAPPINGS                                     *cocoa-mappings* *g:objc_man_key*
 
@@ -151,4 +162,4 @@ To contact the author (Michael Sanders), you may email:
 Thanks for your interest in the script!
 
 ==============================================================================
-vim:tw=78:ts=8:ft=help:norl:enc=utf-8:
+vim:tw=78:ts=8:ft=help:norl:
