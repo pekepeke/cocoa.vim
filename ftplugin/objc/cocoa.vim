@@ -3,7 +3,7 @@
 " Description: Sets up mappings for cocoa.vim.
 " Last Updated: December 26, 2009
 
-" settings {{{
+" settings {{{1
 if !exists('b:undo_ftplugin')
     let b:undo_ftplugin = ''
 endif
@@ -11,17 +11,22 @@ endif
 " setlocal expandtab shiftwidth=4 softtabstop=4 tabstop=8
 
 
+" make {{{2
 " use xcodebuild as make program
 if globpath(expand('<afile>:p:h'), '*.xcodeproj') != ''
     setlocal makeprg=open\ -a\ xcode\ &&\ osascript\ -e\ 'tell\ app\ \"Xcode\"\ to\ build'
 else
     setlocal makeprg=xcodebuild\ -sdk\ iphonesimulator5.0
 endif
-setl include=^\s*#\s*import
+
+" configure {{{2
+setlocal include=^\s*#\s*import
 
 let b:match_words = '@\(implementation\|interface\):@end'
 
-setlocal omnifunc=objc#cocoacomplete#Complete
+if !exists('g:clang_complete_loaded')
+  setlocal omnifunc=objc#cocoacomplete#Complete
+endif
 
 if &ft != 'objc'
     let b:undo_ftplugin .= '
@@ -30,13 +35,7 @@ if &ft != 'objc'
         \'
 endif
 "}}}
-
-
-" mappings {{{
-" use custom man
-nn <buffer> <silent> K :<c-u>call objc#man#ShowDoc()<cr>
-
-" Xcode bindings
+" project detection {{{2
 let b:cocoa_proj = fnameescape(globpath(expand('<afile>:p:h'), '*.xcworkspace'))
 " Search a few levels up to see if we can find the project file
 if empty(b:cocoa_proj)
@@ -65,39 +64,67 @@ if empty(b:cocoa_proj)
     endif
 endif
 
-nn <buffer> <silent> <d-0> :call system('open -a Xcode '.b:cocoa_proj)<cr>
+" commands {{{2
+command! -buffer CocoaDoc call objc#man#ShowDoc()
+command! -buffer XcodeProjOpen call s:XcodeProjOpen()
+command! -buffer XcodeRun call s:RunInXcode()
+command! -buffer XcodeBuild call s:BuildInXcode()
+command! -buffer XcodeTest call s:TestInXcode()
+command! -buffer XcodeAnalyze call s:AnalyzeInXcode()
+command! -buffer XcodeClean call s:CleanInXcode()
 
-nn <buffer> <d-r> :w<bar>call g:RunInXcode()<cr>
-nn <buffer> <d-b> :w<bar>call g:BuildInXcode()<cr>
-nn <buffer> <d-u> :w<bar>call g:TestInXcode()<cr>
-nn <buffer> <d-i> :w<bar>call g:ProfileInXcode()<cr>
-nn <buffer> <d-B> :w<bar>call g:AnalyzeInXcode()<cr>
-nn <buffer> <d-K> :w<bar>call g:CleanInXcode()<cr>
+" mappings {{{2
+nnoremap <buffer><silent> <Plug>(cocoa-doc) :<C-u>call objc#man#ShowDoc()<CR>
+nnoremap <buffer><silent> <Plug>(cocoa-xcode-open) :call <SID>XcodeProjOpen()<cr>
+nnoremap <buffer> <Plug>(cocoa-xcode-run) :w<bar>call <SID>RunInXcode()<cr>
+nnoremap <buffer> <Plug> cocoa-xcode-build) :w<bar>call <SID>BuildInXcode()<cr>
+nnoremap <buffer> <Plug> cocoa-xcode-test) :w<bar>call <SID>TestInXcode()<cr>
+nnoremap <buffer> <Plug> cocoa-xcode-profile) :w<bar>call <SID>ProfileInXcode()<cr>
+nnoremap <buffer> <Plug> cocoa-xcode-analyze) :w<bar>call <SID>AnalyzeInXcode()<cr>
+nnoremap <buffer> <Plug> cocoa-xcode-clean) :w<bar>call <SID>CleanInXcode()<cr>
+if !exists('g:cocoa_no_mappings') || !g:cocoa_no_mappings
+  " use custom man
+  nmap <buffer><silent> K <Plug>(cocoa-doc)
+  " Xcode bindings
+  nmap <buffer> <silent> <d-0> <Plug>(cocoa-xcode-open)
 
+  nmap <buffer> <d-r> <Plug>(cocoa-xcode-run)
+  nmap <buffer> <d-b> <Plug>(cocoa-xcode-build)
+  nmap <buffer> <d-u> <Plug>(cocoa-xcode-test)
+  nmap <buffer> <d-i> <Plug>(cocoa-xcode-profile)
+  nmap <buffer> <d-B> <Plug>(cocoa-xcode-analyze)
+  nmap <buffer> <d-K> <Plug>(cocoa-xcode-clean)
+endif
+
+" util functions {{{2
 " execute only once after this line
 if exists('*s:ExecInXcode') | finish | endif
 
-function g:RunInXcode()
+function! s:XcodeProjOpen()
+  call system('open -a Xcode '.b:cocoa_proj)
+endfunction
+
+function s:RunInXcode()
 	call s:ExecInXcode('Run')
 endfunction
 
-function g:BuildInXcode()
+function s:BuildInXcode()
 	call s:ExecInXcode('Build')
 endfunction
 
-function g:TestInXcode()
+function s:TestInXcode()
 	call s:ExecInXcode('Test')
 endfunction
 
-function g:ProfileInXcode()
+function s:ProfileInXcode()
 	call s:ExecInXcode('Profile')
 endfunction
 
-function g:AnalyzeInXcode()
+function s:AnalyzeInXcode()
 	call s:ExecInXcode('Analyze')
 endfunction
 
-function g:CleanInXcode()
+function s:CleanInXcode()
 	call s:ExecInXcode('Clean')
 endfunction
 
@@ -152,3 +179,4 @@ fun s:ReadableExtensionIn(path, extensions)
 	return 0
 endf
 " }}}
+" __END__ {{{1
