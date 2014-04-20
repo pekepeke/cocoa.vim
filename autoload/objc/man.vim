@@ -20,15 +20,28 @@ endf
 
 let s:docsets =  []
 let locations = [
-			\	{'path': '/Developer/Documentation/DocSets/com.apple.ADC_Reference_Library.CoreReference.docset',
-			\	'alias': 'Leopard'},
-			\	{'path': '/Developer/Documentation/DocSets/com.apple.adc.documentation.AppleSnowLeopard.CoreReference.docset',
-			\	'alias': 'Snow Leopard'},
-			\	{'path': '/Developer/Platforms/iPhoneOS.platform/Developer/Documentation/DocSets/com.apple.adc.documentation.AppleiPhone3_0.iPhoneLibrary.docset',
-			\	'alias': 'iPhone 3.0'},
-			\	{'path': '/Library/Developer/Shared/Documentation/DocSets/com.apple.adc.documentation.AppleiOS5_0.iOSLibrary.docset',
-			\	'alias': 'iPhone 5.0 Xcode 4.2'}
-			\	]
+  \	{'path': '/Developer/Documentation/DocSets/com.apple.ADC_Reference_Library.CoreReference.docset',
+  \	'alias': 'Leopard'},
+  \	{'path': '/Developer/Documentation/DocSets/com.apple.adc.documentation.AppleSnowLeopard.CoreReference.docset',
+  \	'alias': 'Snow Leopard'},
+  \	{'path': '/Developer/Platforms/iPhoneOS.platform/Developer/Documentation/DocSets/com.apple.adc.documentation.AppleiPhone3_0.iPhoneLibrary.docset',
+  \	'alias': 'iPhone 3.0'},
+  \	{'path': '/Library/Developer/Shared/Documentation/DocSets/com.apple.adc.documentation.AppleiOS5_0.iOSLibrary.docset',
+  \	'alias': 'iPhone 5.0 Xcode 4.2'}
+  \ ]
+
+function! s:find_latest_iosdoc()
+  let docsetdir = '/Developer/Platforms/iPhoneOS.platform/Developer/Documentation/DocSets'
+  if isdirectory($HOME.'/Library/Developer/Shared/Documentation/DocSets/')
+    let docsetdir = $HOME.'/Library/Developer/Shared/Documentation/DocSets/'
+  endif
+  let location = split(globpath(docsetdir, '*'), "\n")
+  return {
+    \ 'path' : location,
+    \ 'alias' : substitute(matchstr(location, "iOS[0-9_]*"), "_", ".", "g")
+    \ }
+endfunction
+call add(locations, s:find_latest_iosdoc())
 
 for location in locations
 	if isdirectory(location.path)
