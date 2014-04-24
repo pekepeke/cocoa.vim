@@ -6,20 +6,22 @@
 "               for removing the annoying security alert in Leopard.
 
 
-let g:objc#man#dash_keyword = exists('g:objc#man#dash_keyword')
-\ ? g:objc#man#dash_keyword : 'macosx:'
+let g:objc#man#dash_disable = get(g:, 'objc#man#dash_disable', 0)
+let g:objc#man#dash_keyword = get(g:, 'objc#man#dash_keyword', 'macosx:')
+let g:objc#man#dash_command_format =
+  \ get(g:, 'objc#man#dash_command_format', 'open "dash://%s"')
 
 
 
 
 " Return all matches in for ":CocoaDoc <tab>" sorted by length.
-fun objc#man#Completion(ArgLead, CmdLine, CursorPos)
+function! objc#man#Completion(ArgLead, CmdLine, CursorPos)
 	return system('grep -ho "^'.a:ArgLead.'\w*" ~/.vim/lib/cocoa_indexes/*.txt'.
 	            \ "| perl -e 'print sort {length $a <=> length $b} <>'")
 endf
 
 let s:docsets =  []
-let locations = [
+let s:locations = [
   \	{'path': '/Developer/Documentation/DocSets/com.apple.ADC_Reference_Library.CoreReference.docset',
   \	'alias': 'Leopard'},
   \	{'path': '/Developer/Documentation/DocSets/com.apple.adc.documentation.AppleSnowLeopard.CoreReference.docset',
@@ -30,30 +32,51 @@ let locations = [
   \	'alias': 'iPhone 5.0 Xcode 4.2'}
   \ ]
 
-function! s:find_latest_iosdoc()
-  let docsetdir = '/Developer/Platforms/iPhoneOS.platform/Developer/Documentation/DocSets'
-  if isdirectory($HOME.'/Library/Developer/Shared/Documentation/DocSets/')
-    let docsetdir = $HOME.'/Library/Developer/Shared/Documentation/DocSets/'
-  endif
-  let location = split(globpath(docsetdir, '*'), "\n")
-  return {
-    \ 'path' : location,
-    \ 'alias' : substitute(matchstr(location, "iOS[0-9_]*"), "_", ".", "g")
-    \ }
-endfunction
-call add(locations, s:find_latest_iosdoc())
-
-for location in locations
-	if isdirectory(location.path)
-		call add(s:docsets, location)
-	endif
-endfor
 let s:docset_cmd = '/Developer/usr/bin/docsetutil search -skip-text -query '
 if !executable(s:docset_cmd)
 	let s:docset_cmd = '/Applications/Xcode.app/Contents/Developer/usr/bin/docsetutil search -skip-text -query '
 endif
 
-fun s:OpenFile(file)
+
+function! s:init()
+  call s:setup_documents()
+endfunction
+
+function! s:setup_documents()
+  " call add(s:locations, s:find_latest_iosdoc())
+
+  let docsetdir = '/Developer/Platforms/iPhoneOS.platform/Developer/Documentation/DocSets'
+  if isdirectory($HOME.'/Library/Developer/Shared/Documentation/DocSets/')
+    let docsetdir = $HOME.'/Library/Developer/Shared/Documentation/DocSets/'
+  endif
+  let locations = split(globpath(docsetdir, '*iOS*.docset'), "\n")
+  let candidates = map(locations, 's:make_candidates(v:val, "ios")')
+
+  let locations = split(globpath(docsetdir, '*OSX*.docset'), "\n")
+  let candidates = map(locations, 's:make_candidates(v:val, "osx")')
+
+  for location in s:locations
+    if isdirectory(location.path)
+      call add(s:docsets, location)
+    endif
+  endfor
+  unlet s:locations
+endfunction
+
+function! s:make_candidates(location, type)
+  let alias = a:location
+  if a:type == "ios"
+    let alias = substitute(matchstr(a:location, "AppleiOS[0-9_]*"), "_", ".", "g")
+  else
+    let alias = substitute(matchstr(a:location, "AppleOSX[0-9_]*"), "_", ".", "g")
+  endif
+  return {
+    \ 'path' : a:location,
+    \ 'alias' : alias,
+    \ }
+endfunction
+
+function! s:OpenFile(file)
 	if a:file =~ '/.*/man/'
 		exe ':!'.substitute(&kp, '^man -s', 'man', '').' '.a:file
 	else
@@ -72,7 +95,7 @@ fun s:OpenFile(file)
 	endif
 endf
 
-fun objc#man#ShowDocNonDash(...)
+function! objc#man#ShowDocNonDash(...)
 	let word = a:0 ? a:1 : matchstr(getline('.'), '\<\w*\%'.col('.').'c\w\+:\=')
 
 	" Look up the whole method if it takes multiple arguments.
@@ -139,7 +162,10 @@ fun objc#man#ShowDocNonDash(...)
 	endif
 endf
 
-fun objc#man#ShowDoc(...)
+function! objc#man#ShowDoc(...)
+  if g:objc#man#dash_disable
+    return call('objc#man#ShowDocNonDash', copy(a:000))
+  endif
 	let word = a:0 ? a:1 : matchstr(getline('.'), '\<\w*\%'.col('.').'c\w\+:\=')
 
 	" Look up the whole method if it takes multiple arguments.
@@ -156,10 +182,11 @@ fun objc#man#ShowDoc(...)
 		return
 	endif
 
-	call system('open "dash://'. g:objc#man#dash_keyword . word . '"')
+  let search_word = g:objc#man#dash_keyword . word
+  call system(printf(g:objc#man#dash_command_format, search_word))
 endf
 
-fun s:ChooseFrom(references)
+function! s:ChooseFrom(references)
  	let type_abbr = {'cl' : 'Class', 'intf' : 'Protocol', 'cat' : 'Category',
 	               \ 'intfm' : 'Method', 'instm' : 'Method', 'econst' : 'Enum',
 	               \ 'tdef' : 'Typedef', 'macro' : 'Macro', 'data' : 'Data',
@@ -178,7 +205,7 @@ fun s:ChooseFrom(references)
 	return num ? s:OpenFile(keys(a:references)[num - 1]) : -1
 endf
 
-fun AllKeysEqual(list, key, item)
+function! AllKeysEqual(list, key, item)
 	for item in a:list
 		if item[a:key] != a:item
 			return 0
@@ -187,7 +214,7 @@ fun AllKeysEqual(list, key, item)
 	return 1
 endf
 
-fun s:GetMethodName()
+function! s:GetMethodName()
 	let pos = [line('.'), col('.')]
 	let startpos = searchpos('\v^\s*-.{-}\w+:|\[\s*\w+\s+\w+:|\]\s*\w+:', 'cbW')
 
@@ -218,7 +245,7 @@ fun s:GetMethodName()
 	return s:MatchAll(message, '\w\+:')
 endf
 
-fun s:MatchAll(haystack, needle)
+function! s:MatchAll(haystack, needle)
     let matches = matchstr(a:haystack, a:needle)
     let index = matchend(a:haystack, a:needle)
     while index != -1
@@ -227,4 +254,7 @@ fun s:MatchAll(haystack, needle)
     endw
     return matches
 endf
+
+call s:init()
+
 " vim:noet:sw=4:ts=4:ft=vim
